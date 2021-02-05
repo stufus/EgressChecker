@@ -26,18 +26,18 @@ def colourise(string,colour):
     return "\n\033["+colour+"m"+string+"\033[0m"
 
 def banner():
-    print ""
-    print "       .mMMMMMm.             MMm    M   WW   W   WW   RRRRR"
-    print "      mMMMMMMMMMMM.           MM   MM    W   W   W    R   R"
-    print "     /MMMM-    -MM.           MM   MM    W   W   W    R   R"
-    print "    /MMM.    _  \/  ^         M M M M     W W W W     RRRR"
-    print "    |M.    aRRr    /W|        M M M M     W W W W     R  R"
-    print "    \/  .. ^^^   wWWW|        M  M  M      W   W      R   R"
-    print "       /WW\.  .wWWWW/         M  M  M      W   W      R    R"
-    print "       |WWWWWWWWWWW/"
-    print "         .WWWWWW.        EgressChecker Mini-Framework "+ec_version
-    print "                     stuart.morgan@mwrinfosecurity.com | @ukstufus"
-    print ""
+    print("")
+    print("       .mMMMMMm.             MMm    M   WW   W   WW   RRRRR")
+    print("      mMMMMMMMMMMM.           MM   MM    W   W   W    R   R")
+    print("     /MMMM-    -MM.           MM   MM    W   W   W    R   R")
+    print("    /MMM.    _  \/  ^         M M M M     W W W W     RRRR")
+    print("    |M.    aRRr    /W|        M M M M     W W W W     R  R")
+    print("    \/  .. ^^^   wWWW|        M  M  M      W   W      R   R")
+    print("       /WW\.  .wWWWW/         M  M  M      W   W      R    R")
+    print("       |WWWWWWWWWWW/")
+    print("         .WWWWWW.        EgressChecker Mini-Framework "+ec_version)
+    print("                     stuart.morgan@mwrinfosecurity.com | @ukstufus")
+    print("")
 
 def generate_oneliner(lang):
     pycmd = ''
@@ -226,18 +226,18 @@ def generate_oneliner(lang):
     return pycmd
 
 def print_supported_languages():
-    print "   python         "+"| Generates a python egress buster script."
-    print "   python-cmd     "+"| Generates a python one-liner designed to be copied and pasted."
-    print "   powershell     "+"| Generates a powershell egress buster script."
-    print "   powershell-cmd "+"| Generates a powershell one-liner designed to be copied and pasted."
-    print "   tcpdump        "+"| Generates the tcpdump capture command to be run on the target machine."
+    print("   python         "+"| Generates a python egress buster script.")
+    print("   python-cmd     "+"| Generates a python one-liner designed to be copied and pasted.")
+    print("   powershell     "+"| Generates a powershell egress buster script.")
+    print("   powershell-cmd "+"| Generates a powershell one-liner designed to be copied and pasted.")
+    print("   tcpdump        "+"| Generates the tcpdump capture command to be run on the target machine.")
 
 def write_file_data(prefix,suffix,data):
     date_time = datetime.datetime.now().strftime('%Y%b%d_%H%M%S').lower()
     handle,filename = tempfile.mkstemp(suffix,prefix+date_time+'_')
-    os.write(handle,data)
+    os.write(handle,data.encode('utf-8'))
     os.close(handle)
-    print colourise("Also written to: \033[4;35m"+filename,'0;35')
+    print(colourise("Also written to: \033[4;35m"+filename,'0;35'))
 
 def build_port_list(portstring):
     temp_list = []
@@ -272,50 +272,50 @@ class ec(cmd.Cmd):
     def do_generate(self, param):
         "Generate client code to perform the egress check. Specify a target language.\nExample: generate python-cmd"
         if ec_opts['TARGETIP']['value'].strip()=='':
-            print colourise('Error:','1;31')+" Must specify a target IP. Use 'set TARGETIP x.x.x.x'."
+            print(colourise('Error:','1;31')+" Must specify a target IP. Use 'set TARGETIP x.x.x.x'.")
         elif param == '':
-            print colourise('Error:','1;31')+" Must specify a language."
+            print(colourise('Error:','1;31')+" Must specify a language.")
             print_supported_languages()
         else:
             cmdLang = param.split()[0].lower()
             if (cmdLang == 'python' or cmdLang=='python-cmd'):
                 code = generate_oneliner(cmdLang)
                 if (cmdLang=='python'):
-                    print colourise('Run the code below on the client machine:','0;32')
-                    print code
+                    print(colourise('Run the code below on the client machine:','0;32'))
+                    print(code)
                     write_file_data('egress_','.py',code)
                 elif (cmdLang=='python-cmd'):
-                    print colourise('Run the command below on the client machine:','0;32')
-                    cmdline = 'python -c \'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("'+base64.b64encode(zlib.compress(code))+'")))\''
-                    print cmdline
+                    print(colourise('Run the command below on the client machine:','0;32'))
+                    cmdline = 'python -c \'import base64,sys,zlib;exec(zlib.decompress(base64.b64decode("'+base64.b64encode(zlib.compress(code.encode('utf-8'))).decode('utf-8')+'")))\''
+                    print(cmdline)
                     write_file_data('egress_','.sh',cmdline)
             elif (cmdLang == 'powershell' or cmdLang=='powershell-cmd'):
                 if int(ec_opts['THREADS']['value'])>1:
-                    print colourise("Warning:",'0;33')+" The powershell code does not support multiple threads; it will generate packets asynchronously but on a single thread only."
+                    print(colourise("Warning:",'0;33')+" The powershell code does not support multiple threads; it will generate packets asynchronously but on a single thread only.")
                 code = generate_oneliner(cmdLang)
                 if (cmdLang=='powershell'):
-                    print colourise('Run the code below on the client machine:','0;32')
-                    print code
+                    print(colourise('Run the code below on the client machine:','0;32'))
+                    print(code)
                     write_file_data('egress_','.ps1',code)
                 elif (cmdLang=='powershell-cmd'):
-                    print colourise('Run the command below on the client machine:','0;32')
+                    print(colourise('Run the command below on the client machine:','0;32'))
                     # In powershell, data must be in unicode format (i.e. chr(0) in between each one)
                     unicode_code = ""
                     for c in code.strip():
                         unicode_code += c+"\x00"
-                    cmdline = 'powershell.exe -e '+base64.b64encode(unicode_code)
-                    print cmdline
+                    cmdline = 'powershell.exe -e '+base64.b64encode(unicode_code.encode('utf-8')).decode('utf-8')
+                    print(cmdline)
                     write_file_data('egress_','.bat',cmdline)
             elif cmdLang == 'tcpdump':
                 code = generate_oneliner(cmdLang)
-                print colourise('Run the command below on the target machine (probably yours) to save connection attempts:','0;32')
-                print code[0]
-                print colourise('The commands below will parse the saved capture file and display the ports on which connections were received:','0;32')
-                print code[1]
-                print code[2]
+                print(colourise('Run the command below on the target machine (probably yours) to save connection attempts:','0;32'))
+                print(code[0])
+                print(colourise('The commands below will parse the saved capture file and display the ports on which connections were received:','0;32'))
+                print(code[1])
+                print(code[2])
                 write_file_data('capture_','.sh',code[0]+"\n"+code[1]+"\n"+code[2])
             else:
-                print colourise('Error:','1;31')+" Invalid language specified."
+                print(colourise('Error:','1;31')+" Invalid language specified.")
                 print_supported_languages()
 
     def complete_generate(self, text, line, begidx, endidx):
@@ -349,55 +349,55 @@ class ec(cmd.Cmd):
                     if cmdVariable=='PORTS':
                         finalports = build_port_list(cmdParam)
                         if finalports==0:
-                            print colourise('Error:','1;31')+" Invalid "+cmdVariable+" specification"
+                            print(colourise('Error:','1;31')+" Invalid "+cmdVariable+" specification")
                         else:
                             ec_opts[cmdVariable]['value'] = cmdParam
                             finalword = 'port'
                             finalcount = len(finalports)
                             if (finalcount>1):
                                 finalword += 's'
-                            print cmdVariable+' => '+cmdParam+" ("+str(finalcount)+" "+finalword+")"
+                            print(cmdVariable+' => '+cmdParam+" ("+str(finalcount)+" "+finalword+")")
                     else:
                         ec_opts[cmdVariable]['value'] = cmdParam
-                        print cmdVariable+' => '+cmdParam
+                        print(cmdVariable+' => '+cmdParam)
                 else:
-                    print colourise('Error:','1;31')+" Invalid "+cmdVariable+" setting provided"
+                    print(colourise('Error:','1;31')+" Invalid "+cmdVariable+" setting provided")
             else:
-                print colourise('Error:','1;31')+" "+cmdVariable+" is not recognised"
+                print(colourise('Error:','1;31')+" "+cmdVariable+" is not recognised")
         else:
-            print colourise('Error:','1;31')+" Variable name and value required. Use \'get\' to see all variables."
+            print(colourise('Error:','1;31')+" Variable name and value required. Use \'get\' to see all variables.")
      
     def do_get(self, param):
         "Retrieves the value of the given option. When used without any parameters, this will show all options.\nExample: get PORTS"
         if param != '':
             cmdVariable = param.split()[0].upper()
             if cmdVariable in ec_opts.keys():
-                print cmdVariable+' = '+ec_opts[cmdVariable]['value']
+                print(cmdVariable+' = '+ec_opts[cmdVariable]['value'])
             else:
-                print colourise('Error:','1;31')+" "+cmdVariable+" not found"
+                print(colourise('Error:','1;31')+" "+cmdVariable+" not found")
         else:  
             padding = "+"+'-'*14+"+"+'-'*29+"+"
-            print padding
-            print "| %-12s | %-27s |" % ('Option','Value')
-            print padding
-            for k,v in ec_opts.iteritems():
-                print "| %-12s | %-27s |" % (k,v['value'])
-            print padding
+            print(padding)
+            print("| %-12s | %-27s |" % ('Option','Value'))
+            print(padding)
+            for k,v in ec_opts.items():
+                print("| %-12s | %-27s |" % (k,v['value']))
+            print(padding)
 
     def do_quit(self, param):
         "Exits the framework"
-        print ""
+        print("")
         return True
 
     def do_exit(self, param):
         "Exits the framework"
-        print ""
+        print("")
         return True
 
     do_EOF=do_exit
 
 def signal_handler(signum, frame):
-    print ""
+    print("")
     sys.exit(0)
 
 if __name__ == '__main__':
